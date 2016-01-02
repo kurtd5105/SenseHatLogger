@@ -92,19 +92,6 @@ numbers = {
     ],
 }
 
-#X10 in the bottom 3 rows
-extraDigit = [
-    [1, 0, 1, 1, 0, 1, 1, 1],
-    [0, 1, 0, 1, 0, 1, 0, 1],
-    [1, 0, 1, 1, 0, 1, 1, 1]
-]
-
-hourly = [
-    [1, 0, 1, 0, 1, 1, 0, 0],
-    [1, 1, 1, 0, 1, 0, 1, 0],
-    [1, 0, 1, 0, 1, 0, 0, 0]
-]
-
 
 class DummySenseHat():
     def get_temperature(self):
@@ -137,7 +124,7 @@ def generateNumberGroupings(numbers, groupingLength, screenDimensions, numberDim
     #For every combination of numbers that are of groupingLength
     for group in product(range(10), repeat=groupingLength):
         #Create an empty screen
-        grouping = [[0 for x in range(screenDimensions[1])] for y in range(screenDimensions[0])]
+        grouping = [[0 for col in range(screenDimensions[1])] for row in range(screenDimensions[0])]
 
         #Copy each number onto the screen in the correct position
         for i in range(groupingLength):
@@ -157,9 +144,57 @@ metric is in the standard
 [time, [avgT, minT, maxT], [avgP, minP, maxP], [avgH, minH, maxH]] format, groupings have
 the strings of all possible number combinations of int groupingLength as their key and
 the display grid as the value. The time each part will be displayed on screen will be
-approximately gap seconds. The default is 2 seconds.
+approximately gap seconds. The default is 2 seconds. Color is an rgb list, defaults to green.
 """
-def displayMetrics(sense, currTemp, metric, groupings, groupingLength, gap=2):
+def displayMetrics(sense, currTemp, metric, groupings, groupingLength, gap=2, color=[0, 255, 0]):
+    #X10 in the bottom 3 rows
+    extraDigit = [
+        [[128, 128, 128],   [0, 0, 0],          [128, 128, 128],    [192, 192, 192], [0, 0, 0],
+        [192, 192, 192], [192, 192, 192],   [192, 192, 192]],
+
+        [[0, 0, 0],         [128, 128, 128],    [0, 0, 0],          [192, 192, 192], [0, 0, 0],
+        [192, 192, 192], [0, 0, 0],         [192, 192, 192]],
+
+        [[128, 128, 128],   [0, 0, 0],          [128, 128, 128],    [192, 192, 192], [0, 0, 0],
+        [192, 192, 192], [192, 192, 192],   [192, 192, 192]]
+    ]
+    #T in the bottom 3 rows
+    t = [
+        [[192, 192, 192],   [192, 192, 192], [192, 192, 192],   [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0]],
+
+        [[0, 0, 0],         [192, 192, 192], [0, 0, 0],         [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0]],
+
+        [[0, 0, 0],         [192, 192, 192], [0, 0, 0],         [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0]]
+    ]
+
+    #P in the bottom 3 rows
+    p = [
+        [[192, 192, 192],   [192, 192, 192],    [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0]],
+
+        [[192, 192, 192],   [192, 192, 192],    [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0]],
+
+        [[192, 192, 192],   [0, 0, 0],          [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0]]
+
+    ]
+
+    #H in the bottom 3 rows
+    h = [
+        [[192, 192, 192], [0, 0, 0],        [192, 192, 192], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0]],
+
+        [[192, 192, 192], [192, 192, 192],  [192, 192, 192], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0]],
+
+        [[192, 192, 192], [0, 0, 0],        [192, 192, 192], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0]]
+
+    ]
     sense.clear()
     groups = []
 
@@ -167,10 +202,59 @@ def displayMetrics(sense, currTemp, metric, groupings, groupingLength, gap=2):
     groups.append([str(int(currTemp)), False])
     groups.append([str(currTemp - int(currTemp)), True])
 
+    #Add each metric to the display groups
+    for m in metric[1]:
+        groups.append([str(int(m[0])), False])
+        groups.append([str(m[0] - int(m[0])), True])
+
     overflow = [False for x in range(len(groups))]
-    for i in range(len(groups)):
-        if len(groups[i]) > groupingLength:
+
+    for i in range(8):
+        #Check to see if any group overflows and set its overflow flag and shorten the group
+        if len(groups[i][0]) > groupingLength:
+            groups[i][0] = groups[i][0][0:groupingLength]
             overflow[i] = True
+        #Add a 0 to the front of a non decimal, or in the back of a decimal if necessary
+        elif i % 2 == 0:
+            if len(groups[i][0]) == 1:
+                groups[i][0] = '0' + groups[i][0]
+        else:
+            if len(groups[i][0]) == 1:
+                groups[i][0] = groups[i][0] + '0'
+
+        
+    
+    for i in range(8):
+        #Change color accordingly here
+        #Create a list of r, g, b values for each LED
+        displayList = [[color if groupings[groups[i][0]][row][col] else [0, 0, 0] for col in range(8)] for row in range(5)]
+
+        #If it's a decimal
+        if groups[i][1]:
+            displayList[4][0] = [255, 255, 255]
+
+        #If there is an overflow, add the overflow signal to the screen, and move the thp indicator to the side
+        if overflow[i]:
+            if i < 4:
+                displayList[0][0] = [255, 0, 0]
+            elif i < 6:
+                displayList[1][0] = [255, 255, 0]
+            else:
+                displayList[2][0] = [0, 0, 255]
+            displayList.extend(extraDigit)
+        #If there isn't an overflow, display the thp symbol on the bottom of the screen
+        else:
+            if i < 4:
+                displayList.extend(t)
+            elif i < 6:
+                displayList.extend(p)
+            else:
+                displayList.extend(h)
+
+        #print(displayList)
+        #sense.set_pixels(displayList)
+        
+        time.sleep(gap)
 
 
 if __name__ == '__main__':
@@ -192,7 +276,12 @@ if __name__ == '__main__':
             print(start)
 
             #Take measurements
-            data.append([str(start), sense.get_temperature(), sense.get_pressure(), sense.get_humidity()])
+            data.append([
+                str(start), 
+                round(sense.get_temperature(), 2), 
+                round(sense.get_pressure(), 2), 
+                round(sense.get_humidity(), 2)
+            ])
 
             #Display the current temperature and the current metrics
             displayMetrics(sense, data[-1][1], metric, groupings, 2)
