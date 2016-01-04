@@ -274,7 +274,7 @@ Logs the given metric to the metric log file, given by the metricPath.
 def logMetric(metricPath, metric):
     with open(metricPath, 'a') as f:
         f.write("{} ".format(metric[0]))
-        metric1, metric2, metric3 = metric[0][0], metric[0][1], metric[0][2]
+        metric1, metric2, metric3 = metric[1][0], metric[1][1], metric[1][2]
         f.write("Temperature min: {}; max: {}; avg: {}; ".format(*metric1))
         f.write("Pressure min: {}; max: {}; avg: {}; ".format(*metric2))
         f.write("Humidity min: {}; max: {}; avg: {};\n".format(*metric3))
