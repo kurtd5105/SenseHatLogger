@@ -257,6 +257,29 @@ def displayMetrics(sense, currTemp, metric, groupings, groupingLength, gap=2, co
         time.sleep(gap)
 
 
+"""
+logData
+Logs all the data to a data log file, given by the dataPath.
+"""
+def logData(dataPath, data):
+    with open(dataPath, 'a') as f:
+        for point in data:
+            f.write("{} Temperature: {}; Pressure: {}; Humidity: {};\n".format(*point))       
+
+
+"""
+logMetric
+Logs the given metric to the metric log file, given by the metricPath.
+"""
+def logMetric(metricPath, metric):
+    with open(metricPath, 'a') as f:
+        f.write("{} ".format(metric[0]))
+        metric1, metric2, metric3 = metric[1], metric[2], metric[3]
+        f.write("Temperature min: {}; max: {}; avg: {}; ".format(*metric1))
+        f.write("Pressure min: {}; max: {}; avg: {}; ".format(*metric2))
+        f.write("Humidity min: {}; max: {}; avg: {};\n".format(*metric3))
+
+
 if __name__ == '__main__':
     #sense = SenseHat()
     sense = DummySenseHat()
@@ -300,16 +323,17 @@ if __name__ == '__main__':
         ])
 
         #Calculate metrics here
-        metric = [str(start)]
+        metric = [str(start), []]
         for i in range(1, 4):
             metricData = [d[i] for d in data]
-            metric.append([sum(metricData) / len(metricData), min(metricData), max(metricData)])
-        metrics.append(metric)
+            metric[1].append([sum(metricData) / len(metricData), min(metricData), max(metricData)])
+
+        #Log the data and metric to log files
+        logData(start.strftime("%d-%m-%Y") + "_data.log", data)
+        logMetric(start.strftime("%d-%m-%Y") + "_metric.log", metric)
 
         #Display the current temperature and the current metrics
         displayMetrics(sense, data[-1][1], metric, groupings, 2)
-
-        #Log metrics and data here
 
         target = timedelta(seconds = 60) - (datetime.now() - start)
         time.sleep(target.total_seconds())
