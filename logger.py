@@ -200,16 +200,19 @@ def displayMetrics(sense, currTemp, metric, groupings, groupingLength, gap=2, co
 
     #Append the number as the whole number and then the decimal and whether it's a decimal or not
     groups.append([str(int(currTemp)), False])
-    groups.append([str(currTemp - int(currTemp)), True])
+    groups.append([str(currTemp - int(currTemp))[2:], True])
 
     #Add each metric to the display groups
     for m in metric[1]:
         groups.append([str(int(m[0])), False])
-        groups.append([str(m[0] - int(m[0])), True])
+        groups.append([str(m[0] - int(m[0]))[2:], True])
 
     overflow = [False for x in range(len(groups))]
 
     for i in range(8):
+        if groups[i][0] == '':
+            groups[i][0] = "00"
+            continue
         #Check to see if any group overflows and set its overflow flag and shorten the group
         if len(groups[i][0]) > groupingLength:
             groups[i][0] = groups[i][0][0:groupingLength]
@@ -311,7 +314,10 @@ if __name__ == '__main__':
 
             #Add a 60 second time delta from the start
             target = timedelta(seconds = 60) - (datetime.now() - start)
-            time.sleep(target.total_seconds())
+            delay = target.total_seconds()
+            if delay < 0:
+                delay = 0
+            time.sleep(delay)
 
         start = datetime.now()
         metrics = [str(start)]
@@ -328,6 +334,7 @@ if __name__ == '__main__':
             metricData = [d[i] for d in data]
             metric[1].append([sum(metricData) / len(metricData), min(metricData), max(metricData)])
 
+        print(metric)
         #Log the data and metric to log files
         logData(start.strftime("%d-%m-%Y") + "_data.log", data)
         logMetric(start.strftime("%d-%m-%Y") + "_metric.log", metric)
@@ -336,4 +343,7 @@ if __name__ == '__main__':
         displayMetrics(sense, data[-1][1], metric, groupings, 2)
 
         target = timedelta(seconds = 60) - (datetime.now() - start)
-        time.sleep(target.total_seconds())
+        delay = target.total_seconds()
+        if delay < 0:
+            delay = 0
+        time.sleep(delay)
