@@ -2,6 +2,7 @@
 #SenseHatLogger. Author: kurtd5105
 
 from sense_hat import SenseHat
+import argparse
 import sys
 import time
 from datetime import datetime
@@ -93,24 +94,6 @@ numbers = {
 }
 
 
-class DummySenseHat():
-    def get_temperature(self):
-        return 20
-
-    def get_pressure(self):
-        return 1.0
-
-    def get_humidity(self):
-        return 50
-
-    def clear(self):
-        pass
-
-
-#Create an empty 8x8 array
-empty = [[0 for x in range(8)] for y in range(8)]
-
-
 """
 generateNumberGroupings
 Generates a grid of 0 and 1 for LED off/on for each possible ordering of numbers of a
@@ -146,7 +129,7 @@ the strings of all possible number combinations of int groupingLength as their k
 the display grid as the value. The time each part will be displayed on screen will be
 approximately gap seconds. The default is 1.5 seconds. Color is an rgb list, defaults to green.
 """
-def displayMetrics(sense, currTemp, metric, groupings, groupingLength, gap=1.5, color=[0, 255, 0]):
+def displayMetrics(sense, currTemp, metric, groupings, groupingLength, rotation, gap=1.5, color=[0, 255, 0]):
     #X10 in the bottom 3 rows
     extraDigit = [
         [128, 128, 128],   [0, 0, 0],          [128, 128, 128],    [255, 255, 255], [0, 0, 0],
@@ -196,6 +179,7 @@ def displayMetrics(sense, currTemp, metric, groupings, groupingLength, gap=1.5, 
 
     ]
     sense.clear()
+    sense.set_rotation(rotation)
     groups = []
 
     #Append the number as the whole number and then the decimal and whether it's a decimal or not
@@ -259,6 +243,7 @@ def displayMetrics(sense, currTemp, metric, groupings, groupingLength, gap=1.5, 
         
         time.sleep(gap)
     sense.clear()
+    sense.set_rotation(0)
 
 
 """
@@ -285,8 +270,31 @@ def logMetric(metricPath, metric):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="A Raspberry Pi Sense Hat sensor logger with LED and text file output.")
+    parser.add_argument("-t", "--timerange", nargs=2, type=int, help="Optional argument to change the time range the LED matrix should be off.")
+    parser.add_argument(
+        "-r", "--rotation", nargs=1, type=int,
+        help="Optional argument to change the LED matrix rotation in degrees. The screen will be rotated to the nearest 90 degree."
+    )
+    args = parser.parse_args()
+
+    t = []
+    if args.timerange:
+        t = args.timerange
+        for i in t:
+            if i < 0 or i > 23:
+                print("Time out of range, setting to default.")
+                t = [23, 8]
+                break
+    else:
+        t = [23, 8]
+
+    rotation = 0
+    if args.rotation:
+        rotation = int(((round(args.rotation[0]/90, 0) % 4) * 90))
+
     sense = SenseHat()
-    #sense = DummySenseHat()
+
     groupings = generateNumberGroupings(numbers, 2, (5, 8), (5, 4))
     now = datetime.now()
     target = datetime.now()
@@ -311,7 +319,7 @@ if __name__ == '__main__':
             ])
 
             #Display the current temperature and the current metrics
-            displayMetrics(sense, data[-1][1], metric, groupings, 2)
+            displayMetrics(sense, data[-1][1], metric, groupings, 2, rotation)
 
             #Add a 60 second time delta from the start
             target = timedelta(seconds = 60) - (datetime.now() - start)
@@ -333,7 +341,7 @@ if __name__ == '__main__':
         metric = [str(start), []]
         for i in range(1, 4):
             metricData = [d[i] for d in data]
-            metric[1].append([sum(metricData) / len(metricData), min(metricData), max(metricData)])
+            metric[1].append([round(sum(metricData) / len(metricData), 2), min(metricData), max(metricData)])
 
         print(metric)
         #Log the data and metric to log files
@@ -341,7 +349,7 @@ if __name__ == '__main__':
         logMetric(start.strftime("%d-%m-%Y") + "_metric.log", metric)
 
         #Display the current temperature and the current metrics
-        displayMetrics(sense, data[-1][1], metric, groupings, 2)
+        displayMetrics(sense, data[-1][1], metric, groupings, 2, rotation)
 
         target = timedelta(seconds = 60) - (datetime.now() - start)
         delay = target.total_seconds()
