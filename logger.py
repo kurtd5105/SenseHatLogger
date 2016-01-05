@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #SenseHatLogger. Author: kurtd5105
 
-#from sensor_hat import SenseHat
+from sense_hat import SenseHat
 import sys
 import time
 from datetime import datetime
@@ -149,50 +149,50 @@ approximately gap seconds. The default is 2 seconds. Color is an rgb list, defau
 def displayMetrics(sense, currTemp, metric, groupings, groupingLength, gap=2, color=[0, 255, 0]):
     #X10 in the bottom 3 rows
     extraDigit = [
-        [[128, 128, 128],   [0, 0, 0],          [128, 128, 128],    [192, 192, 192], [0, 0, 0],
-        [192, 192, 192], [192, 192, 192],   [192, 192, 192]],
+        [128, 128, 128],   [0, 0, 0],          [128, 128, 128],    [192, 192, 192], [0, 0, 0],
+        [192, 192, 192], [192, 192, 192],   [192, 192, 192],
 
-        [[0, 0, 0],         [128, 128, 128],    [0, 0, 0],          [192, 192, 192], [0, 0, 0],
-        [192, 192, 192], [0, 0, 0],         [192, 192, 192]],
+        [0, 0, 0],         [128, 128, 128],    [0, 0, 0],          [192, 192, 192], [0, 0, 0],
+        [192, 192, 192], [0, 0, 0],         [192, 192, 192],
 
-        [[128, 128, 128],   [0, 0, 0],          [128, 128, 128],    [192, 192, 192], [0, 0, 0],
-        [192, 192, 192], [192, 192, 192],   [192, 192, 192]]
+        [128, 128, 128],   [0, 0, 0],          [128, 128, 128],    [192, 192, 192], [0, 0, 0],
+        [192, 192, 192], [192, 192, 192],   [192, 192, 192]
     ]
     #T in the bottom 3 rows
     t = [
-        [[192, 192, 192],   [192, 192, 192], [192, 192, 192],   [0, 0, 0], [0, 0, 0], [0, 0, 0],
-        [0, 0, 0], [0, 0, 0]],
+        [192, 192, 192],   [192, 192, 192], [192, 192, 192],   [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0],
 
-        [[0, 0, 0],         [192, 192, 192], [0, 0, 0],         [0, 0, 0], [0, 0, 0], [0, 0, 0],
-        [0, 0, 0], [0, 0, 0]],
+        [0, 0, 0],         [192, 192, 192], [0, 0, 0],         [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0],
 
-        [[0, 0, 0],         [192, 192, 192], [0, 0, 0],         [0, 0, 0], [0, 0, 0], [0, 0, 0],
-        [0, 0, 0], [0, 0, 0]]
+        [0, 0, 0],         [192, 192, 192], [0, 0, 0],         [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0]
     ]
 
     #P in the bottom 3 rows
     p = [
-        [[192, 192, 192],   [192, 192, 192],    [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
-        [0, 0, 0], [0, 0, 0]],
+        [192, 192, 192],   [192, 192, 192],    [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0],
 
-        [[192, 192, 192],   [192, 192, 192],    [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
-        [0, 0, 0], [0, 0, 0]],
+        [192, 192, 192],   [192, 192, 192],    [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0],
 
-        [[192, 192, 192],   [0, 0, 0],          [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
-        [0, 0, 0], [0, 0, 0]]
+        [192, 192, 192],   [0, 0, 0],          [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0]
 
     ]
 
     #H in the bottom 3 rows
     h = [
-        [[192, 192, 192], [0, 0, 0],        [192, 192, 192], [0, 0, 0], [0, 0, 0], [0, 0, 0],
-        [0, 0, 0], [0, 0, 0]],
+        [192, 192, 192], [0, 0, 0],        [192, 192, 192], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0],
 
-        [[192, 192, 192], [192, 192, 192],  [192, 192, 192], [0, 0, 0], [0, 0, 0], [0, 0, 0],
-        [0, 0, 0], [0, 0, 0]],
+        [192, 192, 192], [192, 192, 192],  [192, 192, 192], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0],
 
-        [[192, 192, 192], [0, 0, 0],        [192, 192, 192], [0, 0, 0], [0, 0, 0], [0, 0, 0],
-        [0, 0, 0], [0, 0, 0]]
+        [192, 192, 192], [0, 0, 0],        [192, 192, 192], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+        [0, 0, 0], [0, 0, 0]
 
     ]
     sense.clear()
@@ -228,22 +228,23 @@ def displayMetrics(sense, currTemp, metric, groupings, groupingLength, gap=2, co
         
     
     for i in range(8):
+        sense.clear()
         #Change color accordingly here
         #Create a list of r, g, b values for each LED
-        displayList = [[color if groupings[groups[i][0]][row][col] else [0, 0, 0] for col in range(8)] for row in range(5)]
+        displayList = [color if groupings[groups[i][0]][row][col] else [0, 0, 0] for row in range(5) for col in range(8)]
 
         #If it's a decimal
         if groups[i][1]:
-            displayList[4][0] = [255, 255, 255]
+            displayList[32] = [255, 255, 255]
 
         #If there is an overflow, add the overflow signal to the screen, and move the thp indicator to the side
         if overflow[i]:
             if i < 4:
-                displayList[0][0] = [255, 0, 0]
+                displayList[0] = [255, 0, 0]
             elif i < 6:
-                displayList[1][0] = [255, 255, 0]
+                displayList[8] = [255, 255, 0]
             else:
-                displayList[2][0] = [0, 0, 255]
+                displayList[16] = [0, 0, 255]
             displayList.extend(extraDigit)
         #If there isn't an overflow, display the thp symbol on the bottom of the screen
         else:
@@ -254,10 +255,10 @@ def displayMetrics(sense, currTemp, metric, groupings, groupingLength, gap=2, co
             else:
                 displayList.extend(h)
 
-        #print(displayList)
-        #sense.set_pixels(displayList)
+        sense.set_pixels(displayList)
         
         time.sleep(gap)
+    sense.clear()
 
 
 """
@@ -284,8 +285,8 @@ def logMetric(metricPath, metric):
 
 
 if __name__ == '__main__':
-    #sense = SenseHat()
-    sense = DummySenseHat()
+    sense = SenseHat()
+    #sense = DummySenseHat()
     groupings = generateNumberGroupings(numbers, 2, (5, 8), (5, 4))
     now = datetime.now()
     target = datetime.now()
