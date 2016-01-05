@@ -264,9 +264,9 @@ def logMetric(metricPath, metric):
     with open(metricPath, 'a') as f:
         f.write("{} ".format(metric[0]))
         metric1, metric2, metric3 = metric[1][0], metric[1][1], metric[1][2]
-        f.write("Temperature min: {}; max: {}; avg: {}; ".format(*metric1))
-        f.write("Pressure min: {}; max: {}; avg: {}; ".format(*metric2))
-        f.write("Humidity min: {}; max: {}; avg: {};\n".format(*metric3))
+        f.write("Temperature avg: {}; min: {}; max: {}; ".format(*metric1))
+        f.write("Pressure avg: {}; min: {}; max: {}; ".format(*metric2))
+        f.write("Humidity avg: {}; min: {}; max: {};\n".format(*metric3))
 
 
 if __name__ == '__main__':
