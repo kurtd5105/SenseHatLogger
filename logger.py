@@ -129,7 +129,7 @@ the strings of all possible number combinations of int groupingLength as their k
 the display grid as the value. The time each part will be displayed on screen will be
 approximately gap seconds. The default is 1.5 seconds. Color is an rgb list, defaults to green.
 """
-def displayMetrics(sense, currTemp, metric, groupings, groupingLength, rotation, gap=1.5, color=[0, 255, 0]):
+def displayMetrics(sense, currTemp, metric, groupings, groupingLength, rotation, gap=1, color=[0, 255, 0]):
     #X10 in the bottom 3 rows
     extraDigit = [
         [128, 128, 128],   [0, 0, 0],          [128, 128, 128],    [255, 255, 255], [0, 0, 0],
@@ -320,8 +320,9 @@ if __name__ == '__main__':
                 round(sense.get_humidity(), 2)
             ])
 
-            #Display the current temperature and the current metrics
-            displayMetrics(sense, data[-1][1], metric, groupings, 2, rotation)
+            #Display the current temperature and the current metrics every 2 minutes
+            if i % 2 == 0:
+                displayMetrics(sense, data[-1][1], metric, groupings, 2, rotation)
 
             #Add a 60 second time delta from the start
             target = timedelta(seconds = 60) - (datetime.now() - start)
