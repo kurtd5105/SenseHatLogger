@@ -271,6 +271,18 @@ def logMetric(metricPath, metric):
         f.write("Humidity avg: {}; min: {}; max: {};\n".format(*metric3))
 
 
+def offHour(timerange, curr):
+    if timerange[0] > timerange[1]:
+        if curr.hour >= timerange[0]:
+            return True
+        elif curr.hour < timerange[1]:
+            return True
+    else:
+        if curr.hour >= timerange[0] and curr.hour < timerange[1]:
+            return True
+    return False
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="A Raspberry Pi Sense Hat sensor logger with LED and text file output.")
     parser.add_argument("-t", "--timerange", nargs=2, type=int, help="Optional argument to change the time range the LED matrix should be off.")
@@ -322,7 +334,8 @@ if __name__ == '__main__':
 
             #Display the current temperature and the current metrics every 2 minutes
             if i % 2 == 0:
-                displayMetrics(sense, data[-1][1], metric, groupings, 2, rotation)
+                if not offHour(t, start):
+                    displayMetrics(sense, data[-1][1], metric, groupings, 2, rotation)
 
             #Add a 60 second time delta from the start
             target = timedelta(seconds = 60) - (datetime.now() - start)
@@ -350,9 +363,6 @@ if __name__ == '__main__':
         #Log the data and metric to log files
         logData(start.strftime("%d-%m-%Y") + "_data.log", data)
         logMetric(start.strftime("%d-%m-%Y") + "_metric.log", metric)
-
-        #Display the current temperature and the current metrics
-        displayMetrics(sense, data[-1][1], metric, groupings, 2, rotation)
 
         target = timedelta(seconds = 60) - (datetime.now() - start)
         delay = target.total_seconds()
