@@ -113,8 +113,8 @@ def generateNumberGroupings(numbers, groupingLength, screenDimensions, numberDim
         for i in range(groupingLength):
             for row in range(numberDimensions[0]):
                 for col in range(numberDimensions[1]):
-                    grouping[row][col + (i * numberDimensions[1])] = numbers[str(group[0])][row][col]
-            groupings[str(group[0]) + str(group[1])] = list(grouping)
+                    grouping[row][col + (i * numberDimensions[1])] = numbers[str(group[i])][row][col]
+        groupings[str(group[0]) + str(group[1])] = list(grouping)
 
     return groupings
 
@@ -191,6 +191,9 @@ def displayMetrics(sense, currTemp, metric, groupings, groupingLength, rotation,
         groups.append([str(int(m[0])), False])
         groups.append([str(m[0] - int(m[0]))[2:], True])
 
+    #Set the pressure to ignore the most significant digit, it is probably 1
+    groups[4][0] = str(int(metric[1][1][0]) % 1000)
+
     overflow = [False for x in range(len(groups))]
 
     for i in range(8):
@@ -200,7 +203,8 @@ def displayMetrics(sense, currTemp, metric, groupings, groupingLength, rotation,
         #Check to see if any group overflows and set its overflow flag and shorten the group
         if len(groups[i][0]) > groupingLength:
             groups[i][0] = groups[i][0][0:groupingLength]
-            overflow[i] = True
+            if i % 2 == 0:
+                overflow[i] = True
         #Add a 0 to the front of a non decimal, or in the back of a decimal if necessary
         elif i % 2 == 0:
             if len(groups[i][0]) == 1:
@@ -208,8 +212,6 @@ def displayMetrics(sense, currTemp, metric, groupings, groupingLength, rotation,
         else:
             if len(groups[i][0]) == 1:
                 groups[i][0] = groups[i][0] + '0'
-
-        
     
     for i in range(8):
         sense.clear()
@@ -300,7 +302,7 @@ if __name__ == '__main__':
     target = datetime.now()
 
     #[time, [avgT, minT, maxT], [avgP, minP, maxP], [avgH, minH, maxH]]
-    metric = [0, [[0, 0, 0], [0, 0, 0], [0, 0, 0]]]
+    metric = [0, [[20, 0, 0], [1000, 0, 0], [50, 0, 0]]]
     while True:
         data = []
 
