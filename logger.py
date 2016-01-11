@@ -290,9 +290,11 @@ if __name__ == '__main__':
         "-r", "--rotation", nargs=1, type=int,
         help="Optional argument to change the LED matrix rotation in degrees. The screen will be rotated to the nearest 90 degree."
     )
+    parser.add_argument("-b", "--bright", action="store_true", help="Optional argument to turn the LED matrix to full brightness instead of low.")
     args = parser.parse_args()
 
     t = []
+    #Setup custom timerange if there was a valid range provided
     if args.timerange:
         t = args.timerange
         for i in t:
@@ -304,10 +306,17 @@ if __name__ == '__main__':
         t = [23, 8]
 
     rotation = 0
+    #Setup the rotation if it was provided
     if args.rotation:
         rotation = int(((round(args.rotation[0]/90, 0) % 4) * 90))
 
     sense = SenseHat()
+
+    #Set the LED matrix to bright if the argument was provided
+    if args.bright:
+        sense.low_light = False
+    else:
+        sense.low_light = True
 
     groupings = generateNumberGroupings(numbers, 2, (5, 8), (5, 4))
     now = datetime.now()
