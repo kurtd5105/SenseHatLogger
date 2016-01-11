@@ -5,7 +5,7 @@ A Raspberry Pi Sense Hat sensor logger with LED and text file output.
 ####logger.py [-h] [-t START END] [-r ROTATION] [-b]
 
 ####-h, --help
-show help message and exit
+Show automatically generated help message and exit.
 
 ####-t START END, --timerange START END
 Optional argument to change hours the LED matrix should be off. Time range is a start and an end hour, where the start is inclusive and the end is exclusive. Both times are 0 indexed 24 hour times, so valid hours are 0-23.
